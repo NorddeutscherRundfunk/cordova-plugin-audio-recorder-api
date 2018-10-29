@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.lang.Throwable;
 
 public class AudioRecorderAPI extends CordovaPlugin {
-    private static final String RECORD = Manifest.permission.RECORD_AUDIO;
-    private static final int AUDIO_RECORD_PERMISSION_CALLBACK = 0;
+    private static final String REQUEST_RECORD = Manifest.permission.RECORD_AUDIO;
+    private static final int CALLBACK_CODE = 156646559;
 
     private MediaRecorder myRecorder;
     private String outputFile;
@@ -45,8 +45,8 @@ public class AudioRecorderAPI extends CordovaPlugin {
         if ("record".equals(action)) {
             this.callbackContext = callbackContext;
 
-            if (!cordova.hasPermission(RECORD)) {
-                cordova.requestPermission(this, AUDIO_RECORD_PERMISSION_CALLBACK, RECORD);
+            if (!cordova.hasPermission(REQUEST_RECORD)) {
+                cordova.requestPermission(this, CALLBACK_CODE, REQUEST_RECORD);
                 Log.d("AudioRecorderAPI", "AUDIO_RECORD_PERMISSION_CALL");
                 sendPluginResult(PluginResult.Status.OK, "PERMISSION_CALL");
                 return true;
@@ -106,16 +106,32 @@ public class AudioRecorderAPI extends CordovaPlugin {
     }
 
     public void onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) throws JSONException {
-        for (int r : grantResults) {
-            if (r == PackageManager.PERMISSION_DENIED) {
-                this.callbackContext.error("Permission was denied");
-            }
 
-            switch (requestCode) {
-                case AUDIO_RECORD_PERMISSION_CALLBACK:
-                    this.record(cordova.getActivity().getApplicationContext());
-                    break;
-            }
+        // only my request shall be handled
+        if (requestCode != CALLBACK_CODE)
+            return;
+
+        int grandResult = PackageManager.PERMISSION_DENIED;
+
+        // permission and grant result have to have the same index
+        for (int idx = 0; idx < permissions.length; idx++) {
+            if (Manifest.permission.RECORD_AUDIO.equals(permissions[idx]))
+                grandResult = grantResults[idx];
+        }
+
+        switch (grandResult) {
+            case PackageManager.PERMISSION_DENIED:
+                this.callbackContext.error("Permission was denied");
+                break;
+
+            case PackageManager.PERMISSION_GRANTED:
+                this.record(cordova.getActivity().getApplicationContext());
+                break;
+            default:
+                String msg = "Permission grand result: " + grandResult + "  is unkown.";
+                Log.w("AudioRecorderAPI", msg);
+                this.callbackContext.error(msg);
+                break;
         }
     }
 
