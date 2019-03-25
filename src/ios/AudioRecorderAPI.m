@@ -21,7 +21,6 @@
             [[audioSessionPortDescription portType] isEqualToString:AVAudioSessionPortBluetoothLE]
             ) {
             
-            [audioSession setPreferredInput:audioSessionPortDescription error:nil];
             break;
         }
     }
@@ -50,6 +49,8 @@
         
         AVAudioSession *audioSession = [AVAudioSession sharedInstance];
         
+        [self findConnectedHeadSet:audioSession];
+                
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"PERMISSION_CALL"];
         [pluginResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_command.callbackId];
@@ -97,6 +98,7 @@
         [recordSettings setObject:[NSNumber numberWithInt:44100] forKey:AVEncoderBitRateKey];
         [recordSettings setObject:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
         [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityMedium] forKey: AVEncoderAudioQualityKey];
+        [self setHeadSetPreferred:audioSession];
         
                 // Create a new dated file
         NSString *uuid = [[NSUUID UUID] UUIDString];
@@ -142,9 +144,6 @@
     _command = command;
     NSLog(@"AudioRecorderAPI stopRecording");
     [recorder stop];
-    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
-    [self findConnectedHeadSet:audioSession];
-    [self setHeadSetPreferred:audioSession];
     NSLog(@"AudioRecorderAPI stopped");
 }
 
