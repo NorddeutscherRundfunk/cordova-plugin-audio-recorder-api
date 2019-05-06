@@ -5,6 +5,37 @@
 
 #define RECORDINGS_FOLDER [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"]
 
+- (void)findConnectedHeadSet:(AVAudioSession *)audioSession {
+    NSArray<AVAudioSessionPortDescription *> *availableInputs = [audioSession availableInputs];
+    
+    for (int i=0; i < [availableInputs count]; i++) {
+        audioSessionPortDescription = [availableInputs objectAtIndex:i];
+        
+        NSLog(@"AudioRecorderAPI find connected HeadSet: %@ %@", [audioSessionPortDescription portName], [audioSessionPortDescription portType]);
+        
+        if (
+            [[audioSessionPortDescription portType] isEqualToString:AVAudioSessionPortHeadphones] ||
+            [[audioSessionPortDescription portType] isEqualToString:AVAudioSessionPortBluetoothHFP] ||
+            [[audioSessionPortDescription portType] isEqualToString:AVAudioSessionPortBluetoothA2DP] ||
+            [[audioSessionPortDescription portType] isEqualToString:AVAudioSessionPortHeadsetMic] ||
+            [[audioSessionPortDescription portType] isEqualToString:AVAudioSessionPortBluetoothLE]
+            ) {
+            
+            break;
+        }
+    }
+}
+
+
+- (void)setHeadSetPreferred:(AVAudioSession *)audioSession {
+    
+    if (audioSessionPortDescription == nil) return;
+    
+    NSLog(@"AudioRecorderAPI setHeadSetPreferred: %@ %@", [audioSessionPortDescription portName], [audioSessionPortDescription portType]);
+    [audioSession setPreferredInput:audioSessionPortDescription error:nil];
+    
+}
+
 - (void)record:(CDVInvokedUrlCommand*)command {
     _command = command;
     if ([_command.arguments count] > 0) {
@@ -18,6 +49,8 @@
         
         AVAudioSession *audioSession = [AVAudioSession sharedInstance];
         
+        [self findConnectedHeadSet:audioSession];
+                
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"PERMISSION_CALL"];
         [pluginResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_command.callbackId];
@@ -46,7 +79,7 @@
         {
             NSLog(@"AudioRecorderAPI setCategory %@ %ld %@", [err domain], (long)[err code], [[err userInfo] description]);
         }
-       
+        
         
         err = nil;
         [audioSession setActive:YES error:&err];
@@ -54,7 +87,7 @@
         {
             NSLog(@"AudioRecorderAPI setActive %@ %ld %@", [err domain], (long)[err code], [[err userInfo] description]);
         }
-   
+        
         UInt32 audioRouteOverride = kAudioSessionOverrideAudioRoute_Speaker;
         AudioSessionSetProperty (kAudioSessionProperty_OverrideAudioRoute, sizeof (audioRouteOverride),&audioRouteOverride);
         
@@ -65,8 +98,9 @@
         [recordSettings setObject:[NSNumber numberWithInt:44100] forKey:AVEncoderBitRateKey];
         [recordSettings setObject:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
         [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityMedium] forKey: AVEncoderAudioQualityKey];
+        [self setHeadSetPreferred:audioSession];
         
-        // Create a new dated file
+                // Create a new dated file
         NSString *uuid = [[NSUUID UUID] UUIDString];
         recorderFilePath = [NSString stringWithFormat:@"%@/%@.m4a", RECORDINGS_FOLDER, uuid];
         NSLog(@"AudioRecorderAPI recording file path: %@", recorderFilePath);

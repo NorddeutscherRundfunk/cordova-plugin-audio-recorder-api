@@ -3,12 +3,13 @@
 #import <AudioToolbox/AudioServices.h>
 
 @interface AudioRecorderAPI : CDVPlugin {
-  NSString *recorderFilePath;
-  NSNumber *duration;
-  AVAudioRecorder *recorder;
-  AVAudioPlayer *player;
-  CDVPluginResult *pluginResult;
-  CDVInvokedUrlCommand *_command;
+    NSString *recorderFilePath;
+    NSNumber *duration;
+    AVAudioRecorder *recorder;
+    AVAudioPlayer *player;
+    AVAudioSessionPortDescription *audioSessionPortDescription;
+    CDVPluginResult *pluginResult;
+    CDVInvokedUrlCommand *_command;
 }
 
 - (void)record:(CDVInvokedUrlCommand*)command;
