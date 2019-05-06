@@ -97,10 +97,11 @@
         [recordSettings setObject:[NSNumber numberWithInt:1] forKey:AVNumberOfChannelsKey];
         [recordSettings setObject:[NSNumber numberWithInt:44100] forKey:AVEncoderBitRateKey];
         [recordSettings setObject:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
-        [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityMedium] forKey: AVEncoderAudioQualityKey];
+        [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityHigh] forKey: AVEncoderAudioQualityKey];
+        [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityHigh] forKey: AVEncoderAudioQualityForVBRKey];
         [self setHeadSetPreferred:audioSession];
         
-                // Create a new dated file
+        // Create a new dated file
         NSString *uuid = [[NSUUID UUID] UUIDString];
         recorderFilePath = [NSString stringWithFormat:@"%@/%@.m4a", RECORDINGS_FOLDER, uuid];
         NSLog(@"AudioRecorderAPI recording file path: %@", recorderFilePath);
