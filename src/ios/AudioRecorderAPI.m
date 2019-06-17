@@ -50,7 +50,7 @@
         AVAudioSession *audioSession = [AVAudioSession sharedInstance];
         
         [self findConnectedHeadSet:audioSession];
-                
+        
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"PERMISSION_CALL"];
         [pluginResult setKeepCallbackAsBool:YES];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_command.callbackId];
@@ -97,8 +97,7 @@
         [recordSettings setObject:[NSNumber numberWithInt:1] forKey:AVNumberOfChannelsKey];
         [recordSettings setObject:[NSNumber numberWithInt:44100] forKey:AVEncoderBitRateKey];
         [recordSettings setObject:[NSNumber numberWithInt:16] forKey:AVLinearPCMBitDepthKey];
-        [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityHigh] forKey: AVEncoderAudioQualityKey];
-        [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityHigh] forKey: AVEncoderAudioQualityForVBRKey];
+        [recordSettings setObject:[NSNumber numberWithInt: AVAudioQualityMedium] forKey: AVEncoderAudioQualityKey];
         [self setHeadSetPreferred:audioSession];
         
         // Create a new dated file
@@ -114,7 +113,7 @@
             return;
         }
         
-        [recorder setDelegate:self];
+       [recorder setDelegate:self];
         
         if (![recorder prepareToRecord]) {
             NSLog(@"AudioRecorderAPI prepareToRecord failed");
@@ -183,6 +182,8 @@
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:recorderFilePath];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:_command.callbackId];
     }
+    // restores the output category from record to playback
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:Nil];
 }
 
 @end
