@@ -28,7 +28,7 @@
       </feature>
     </config-file>
     <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
-        <string>Microhphone is needed to record dications</string>
+        <string>$MICROPHONE_USAGE_DESCRIPTION</string>
     </config-file>
     <header-file src="src/ios/AudioRecorderAPI.h"/>
     <source-file src="src/ios/AudioRecorderAPI.m"/>
